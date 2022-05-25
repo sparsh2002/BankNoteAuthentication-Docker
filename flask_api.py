@@ -1,86 +1,50 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 15 12:50:04 2020
+Created on Wed May 25 19:11:44 2022
 
-@author: krish.naik
+@author: sparshjhariya
 """
 
-from flask import Flask, request
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 24 08:34:10 2022
+
+@author: sparshjhariya
+"""
+
+from flask import Flask,request
+import pandas as pd
 import numpy as np
 import pickle
-import pandas as pd
-import flasgger
-from flasgger import Swagger
 
-app=Flask(__name__)
-Swagger(app)
+app = Flask(__name__)
 
-pickle_in = open("classifier.pkl","rb")
-classifier=pickle.load(pickle_in)
+pickle_in = open('classifier.pkl' , 'rb')
+
+classifier = pickle.load(pickle_in)
 
 @app.route('/')
 def welcome():
     return "Welcome All"
 
-@app.route('/predict',methods=["Get"])
-def predict_note_authentication():
-    
-    """Let's Authenticate the Banks Note 
-    This is using docstrings for specifications.
-    ---
-    parameters:  
-      - name: variance
-        in: query
-        type: number
-        required: true
-      - name: skewness
-        in: query
-        type: number
-        required: true
-      - name: curtosis
-        in: query
-        type: number
-        required: true
-      - name: entropy
-        in: query
-        type: number
-        required: true
-    responses:
-        200:
-            description: The output values
-        
-    """
-    variance=request.args.get("variance")
-    skewness=request.args.get("skewness")
-    curtosis=request.args.get("curtosis")
-    entropy=request.args.get("entropy")
-    prediction=classifier.predict([[variance,skewness,curtosis,entropy]])
-    print(prediction)
-    return "Hello The answer is"+str(prediction)
 
-@app.route('/predict_file',methods=["POST"])
+@app.route('/predict')
+def predict_note():
+    variance = request.args.get('variance')
+    skewness = request.args.get('skewness')
+    curtosis = request.args.get('curtosis')
+    entropy = request.args.get('entropy')
+    prediction = classifier.predict([[variance , skewness , curtosis , entropy]])
+    return "The predicted value is" + str(prediction)
+
+
+@app.route('/predict_file' , methods=["POST"])
 def predict_note_file():
-    """Let's Authenticate the Banks Note 
-    This is using docstrings for specifications.
-    ---
-    parameters:
-      - name: file
-        in: formData
-        type: file
-        required: true
-      
-    responses:
-        200:
-            description: The output values
-        
-    """
-    df_test=pd.read_csv(request.files.get("file"))
-    print(df_test.head())
-    prediction=classifier.predict(df_test)
-    
-    return str(list(prediction))
+    df_test = pd.read_csv(request.files.get('file'))
+    prediction = classifier.predict(df_test)
+    return "The predicted value for the csv is" + str(list(prediction))
 
-if __name__=='__main__':
-    app.run(host='0.0.0.0',port=8000)
-    
-    
+if __name__ == '__main__':
+    app.run(debug=True)
